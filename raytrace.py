@@ -337,19 +337,19 @@ def view_debug(scene):
 
 
 if( __name__ == "__main__"):
-    tmp = []
+    tmp = [] #Start with emtpy array
     add_box(tmp,
          -10, 0, 0,
-        300, 100, 100)
+        300, 100, 100) #Add the polygon points
     tmp  =np.array(tmp)
     r = make_rotX(1)
     r2 = make_rotY(-.2)
     s = make_scale(.7, .7,.7)
-    t = make_translate(10,40,200)
-    tmp =  (t@(r @ r2)@ s @ tmp.T).T
-    m = mesh( polygons=tmp,color=c4, reflectiveness=.7, refractive_n=1.5, opacity=1)
+    t = make_translate(10,40,200) #Make transformation matrices (optional)
+    tmp =  (t@(r @ r2)@ s @ tmp.T).T #Apply transformations
+    m = mesh( polygons=tmp,color=c4, reflectiveness=.7, refractive_n=1.5, opacity=1) #Turn it into a mesh
 
-    tmp = []
+    tmp = [] 
     add_box(tmp,
          -10, 50, 0,
         300, 100, 100)
@@ -366,7 +366,7 @@ if( __name__ == "__main__"):
     max_angle = 1 * math.pi
     # for theta in range(steps):
     tmp = []
-    add_mesh("shinies.STL", tmp)
+    add_mesh("shinies.STL", tmp) #Loads the STL file
     tmp  =np.array(tmp)
     center = np.average(tmp, axis=0)
     t_center = make_translate(*(-center[:-1]))
@@ -378,26 +378,22 @@ if( __name__ == "__main__"):
 
     plane_points = np.array([[1, -150, 1, 1], [1, -150,0 ,1], [-1,-150,0,1]], dtype=np.float64)
 
-    p = plane(plane_points, color = c2, reflectiveness=0)
 
-    s = sphere([-50, -50, 0], 80, refractive_n=1.5, opacity=1) #sphere([-175, 0, 100], 80)
-
-
-    duck = Image.open("mesh_files/stuyvesant.jpg")
+    duck = Image.open("mesh_files/stuyvesant.jpg") #Open image file to use as simple tmap
+    #Currently only the bounded plane accepts tmap
     duck = np.array(duck)[:,:,:]
-    # print(duck.shape)
 
-
-    bp1 = bounded_plane([300,-300,5,1],[300,300,5,1],[-300,300,5,1],[-300,-300,5,1],reflectiveness=.6, color=c2)
+    bp1 = bounded_plane([300,-300,5,1],[300,300,5,1],[-300,300,5,1],[-300,-300,5,1],reflectiveness=0, tmap=duck)
     bp2 = bounded_plane([300,-300,5,1],[300,-300,900,1],[-300,-300,900,1],[-300,-300,5,1],reflectiveness=0, tmap=duck)
     bp3 = bounded_plane([300,300,5,1],[300,300,900,1],[300,-300,900,1],[300,-300,5,1],reflectiveness=0, tmap=duck)
     bp4 = bounded_plane([300,300,5,1],[300,300,900,1],[-300,300,900,1],[-300,300,5,1],reflectiveness=0, tmap=duck)
     bp5 = bounded_plane([-300,300,5,1],[-300,300,900,1],[-300,-300,900,1],[-300,-300,5,1],reflectiveness=0, tmap=duck)
     bp6 = bounded_plane([300,-300,900,1],[300,300,900,1],[-300,300,900,1],[-300,-300,900,1],reflectiveness=0, tmap=duck)
 
-    scene =  [bp1, bp2, bp3, bp4, bp5, bp6, dia] #[p, bp, m, m2]
+    scene =  [bp1, bp2, bp3, bp4, bp5, bp6, m, m2] #List of objects
 
-    draw_polygons_raytrace(scene,f"ret_actual5.png", fov=250, log_px = [(20,10)],resolution=1)
+    #Draws the image
+    draw_polygons_raytrace(scene,f"ret.png", fov=250,resolution=1)
 
-    view_debug(scene)
+    # view_debug(scene)
     # print(ray_log)
