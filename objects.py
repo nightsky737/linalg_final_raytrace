@@ -50,8 +50,8 @@ class Ray:
                 valid = (
                     (b1 >= 0) & (b2 >= 0) & #Both bs are valid
                     (b1 + b2 <= 1) & #Third barycentric coord is > 1
-                    (eps <= t) & (t < min_intersect) & #t is not negative
-                    (S1_dot_E1 > 10e-10)) #S1_dot_E1 was not 10e-10. Slightly hacky but should work since this would make intersection point being like rlly rlly far like out of view far
+                    (eps <= t) & (t < min_intersect)  #t is not negative
+                    ) #S1_dot_E1 was not 10e-10. Slightly hacky but should work since this would make intersection point being like rlly rlly far like out of view far
 
                 if np.any(valid):
                     if shadow:
@@ -69,7 +69,6 @@ class Ray:
                 C = tris[:, 2,:-1]# Stores every third point of every triangle
 
 
-                #Oh dear what are we doing? E1, E2,edges. S is 
                 E1 = B - A
                 E2 = C - A
                 S = self.start - A
@@ -86,10 +85,9 @@ class Ray:
                 b2 = np.einsum("ij,j->i", S2, self.direction)/ S1_dot_E1
 
                 valid = (
-                    (b1 >= 0) & (b2 >= 0) & #Both bs are valid
-                    (b1 + b2 <= 1) & #Third barycentric coord is > 1
-                    (eps <= t) & (t < min_intersect)) #S1_dot_E1 was not 10e-10. Slightly hacky but should work since this would make intersection point being like rlly rlly far like out of view far
-
+                    (b1 >= 0) & (b2 >= 0) & 
+                    (b1 + b2 <= 1) & 
+                    (eps <= t) & (t < min_intersect)) 
                 if np.any(valid):
                     if shadow:
                         return True
@@ -103,9 +101,9 @@ class Ray:
 
             if type(obj) == plane:
                 polygons = obj.points
-                A = polygons[0,:-1]#.reshape(3)
-                B =polygons[1,:-1]#.reshape(3,1)
-                C = polygons[2,:-1]#.reshape(3,1)
+                A = polygons[0,:-1]
+                B =polygons[1,:-1]
+                C = polygons[2,:-1]
 
                 E1 = B - A
                 E2 = C - A
@@ -166,7 +164,6 @@ class Ray:
     
     
     def get_lighting_color(self, inter_obj,light,  idx = None, inter_point=None, ambient=[50, 50, 50]):
-        #gonna assume normal, view uh vectorized
         view = -self.direction
         
         color = inter_obj.color
@@ -280,9 +277,9 @@ class bounded_plane(solid):
             else:
                 color_here = self.tmap[int(v * (self.tmap.shape[0] -1)),  int(u * (self.tmap.shape[1] -1)),:].astype(np.float32)
             color_here /= 255
-            self.intersect_color = {'red': [color_here[0] ,color_here[0] ,color_here[0]],
-                                    'green': [color_here[1], color_here[1],color_here[1]],
-                                    'blue': [color_here[2], color_here[2], color_here[2]]} 
+            self.intersect_color = {'red': [color_here[0] ,color_here[0], 0.6 * color_here[0]],
+                                    'green': [color_here[1], color_here[1],0.6 * color_here[1]],
+                                    'blue': [color_here[2], color_here[2],0.6 *  color_here[2]]} 
         
 
 

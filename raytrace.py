@@ -10,13 +10,13 @@ import open3d as o3d
 
 ray_log = {}
 
-viewerpos = np.array([0, 0, 1000])
+viewerpos = np.array([0, 0, 600])
 camera_z = 300
-lightpos  = np.array([0,1000,1000]) #np.array([0, 300, 500])
+lightpos  = np.array([0,150,800]) #np.array([0, 300, 500])
 
 def recursive_raytrace(ray, scene, lightpos, light_color, recursion_number, prev_obj=None, prev_idx=None,ray_type="source",debug_log=None):
     if recursion_number >= MAX_RECURSION:
-        return np.array([0,0,0])
+        return BACKGROUND_COLOR#np.array([50,50,0])
     inter_idx, inter_obj, inter_t = ray.intersects(scene, origin_obj=prev_obj, origin_idx = prev_idx)
 
     if debug_log != None:
@@ -124,7 +124,6 @@ def make_refraction_ray(n1, n2, ray,n, intersect_point):
     return refraction_ray
 
 def calc_fresnel_reflectivity(n1, n2, norm, ray):
-    #https://blog.demofox.org/2017/01/09/raytracing-reflection-refraction-fresnel-total-internal-reflection-and-beers-law/
     #n1 defaults to air, n2 is intersected obj
     cos1 = np.dot(norm, ray.direction)
     if cos1 < 0:
@@ -340,15 +339,28 @@ def view_debug(scene):
 if( __name__ == "__main__"):
     tmp = []
     add_box(tmp,
-         -10, 50, 0,
+         -10, 0, 0,
         300, 100, 100)
     tmp  =np.array(tmp)
     r = make_rotX(1)
     r2 = make_rotY(-.2)
     s = make_scale(.7, .7,.7)
-    t = make_translate(10,40,400)
+    t = make_translate(10,40,200)
     tmp =  (t@(r @ r2)@ s @ tmp.T).T
-    m = mesh( polygons=tmp,color=c1, reflectiveness=.7, refractive_n=1.5, opacity=1)
+    m = mesh( polygons=tmp,color=c4, reflectiveness=.7, refractive_n=1.5, opacity=1)
+
+    tmp = []
+    add_box(tmp,
+         -10, 50, 0,
+        300, 100, 100)
+    tmp  =np.array(tmp)
+    r = make_rotX(1)
+    r2 = make_rotY(2 * math.pi * 0.7)
+    r3 = make_rotZ(math.pi * .3 )
+    s = make_scale(.5,.5,3)
+    t = make_translate(-100,-70,50)
+    tmp =  (r2 @ r3 @ s @ tmp.T).T
+    m2 = mesh( polygons=tmp,color=c3, reflectiveness=.7, refractive_n=1.5, opacity=1)
 
     steps = 30
     max_angle = 1 * math.pi
@@ -362,7 +374,7 @@ if( __name__ == "__main__"):
     t = make_translate(0,0,20)
     r = make_rotX(1) #make_rotX(theta / steps * max_angle)
     tmp = (s @ t @ r @ t_center @ tmp.T).T
-    dia = mesh( polygons=tmp,color=c1, refractive_n=1.5, reflectiveness=.5, opacity=0)
+    dia = mesh( polygons=tmp,color=c1, refractive_n=2.42, reflectiveness=.17, opacity=0)
 
     plane_points = np.array([[1, -150, 1, 1], [1, -150,0 ,1], [-1,-150,0,1]], dtype=np.float64)
 
@@ -370,19 +382,22 @@ if( __name__ == "__main__"):
 
     s = sphere([-50, -50, 0], 80, refractive_n=1.5, opacity=1) #sphere([-175, 0, 100], 80)
 
-    # duck = Image.open("mesh_files/patrickhonner.jpg")
-    # duck = np.array(duck.convert('RGB'))
 
-    duck = Image.open("mesh_files/duck_tmap.png")
-    duck = np.array(duck)[:,:,:-1]
-
-
-    bp = bounded_plane([200,-200,5,1],[200,200,5,1],[-200,200,5,1],[-200,-200,5,1],reflectiveness=0, tmap=duck)
-    scene =  [ bp, dia, m] #[p, bp, m, m2]
-
-    # draw_polygons_raytrace(scene,"ret.png", 1, 500,single_x=50, single_y=10)
-
-    draw_polygons_raytrace(scene,f"ret_actual.png", fov=300, log_px = [ (50, 10),(0, 10),(0,0)],resolution=1)
-    # view_debug(scene)
+    duck = Image.open("mesh_files/stuyvesant.jpg")
+    duck = np.array(duck)[:,:,:]
+    # print(duck.shape)
 
 
+    bp1 = bounded_plane([300,-300,5,1],[300,300,5,1],[-300,300,5,1],[-300,-300,5,1],reflectiveness=.6, color=c2)
+    bp2 = bounded_plane([300,-300,5,1],[300,-300,900,1],[-300,-300,900,1],[-300,-300,5,1],reflectiveness=0, tmap=duck)
+    bp3 = bounded_plane([300,300,5,1],[300,300,900,1],[300,-300,900,1],[300,-300,5,1],reflectiveness=0, tmap=duck)
+    bp4 = bounded_plane([300,300,5,1],[300,300,900,1],[-300,300,900,1],[-300,300,5,1],reflectiveness=0, tmap=duck)
+    bp5 = bounded_plane([-300,300,5,1],[-300,300,900,1],[-300,-300,900,1],[-300,-300,5,1],reflectiveness=0, tmap=duck)
+    bp6 = bounded_plane([300,-300,900,1],[300,300,900,1],[-300,300,900,1],[-300,-300,900,1],reflectiveness=0, tmap=duck)
+
+    scene =  [bp1, bp2, bp3, bp4, bp5, bp6, dia] #[p, bp, m, m2]
+
+    draw_polygons_raytrace(scene,f"ret_actual5.png", fov=250, log_px = [(20,10)],resolution=1)
+
+    view_debug(scene)
+    # print(ray_log)
